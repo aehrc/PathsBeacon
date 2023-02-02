@@ -8,12 +8,12 @@ terraform {
 }
 
 provider aws {
-  region = "ap-southeast-2"
+  region = "ap-southeast-3"
 }
 
 provider aws {
-  alias = "apsoutheast2"
-  region = "ap-southeast-2"
+  alias = "apsoutheast3"
+  region = "ap-southeast-3"
 }
 provider aws {
   alias = "useast1"
