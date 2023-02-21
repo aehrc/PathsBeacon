@@ -1,8 +1,6 @@
 ---
 Description: WAF ACL for API, required as terraform does not support WAFv2 yet.
 Parameters:
-  resourceArn:
-    Type: String
   maxRequestsPerFiveMinutes:
     Type: Number
 Resources:
@@ -10,7 +8,7 @@ Resources:
     Type: AWS::WAFv2::WebACL
     Properties:
       Name: ApiWafAcl
-      Scope: REGIONAL
+      Scope: CLOUDFRONT
       Description: WAF ACL for API
       DefaultAction:
         Allow: {}
@@ -91,8 +89,6 @@ Resources:
             ManagedRuleGroupStatement:
               VendorName: AWS
               Name: AWSManagedRulesCommonRuleSet
-  ApiWafAclAssociation:
-    Type: AWS::WAFv2::WebACLAssociation
-    Properties:
-      ResourceArn: !Ref resourceArn
-      WebACLArn: !GetAtt ApiWafAcl.Arn
+Outputs:
+  ApiAclArn:
+    Value: !GetAtt ApiWafAcl.Arn

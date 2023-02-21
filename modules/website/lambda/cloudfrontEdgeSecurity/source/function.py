@@ -27,7 +27,8 @@ STATIC_SECURITY_HEADERS = {
 
 
 def add_security_headers(headers, api_url, s3_domain):
-    api_domain = api_url[:api_url.find('/', 8)]
+    post_domain_slash_index = api_url.find('/', 8)
+    api_domain = api_url if post_domain_slash_index == -1 else api_url[:post_domain_slash_index]
     for header, value in STATIC_SECURITY_HEADERS.items():
         if header == 'Content-Security-Policy':
             value = value.replace(

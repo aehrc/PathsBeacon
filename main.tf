@@ -26,6 +26,11 @@ module beacon_api {
   beacon-name = var.beacon-name
   organisation-id = var.organisation-id
   organisation-name = var.organisation-name
+
+  providers = {
+    aws = aws
+    aws.useast1 = aws.useast1
+  }
 }
 
 module update_data {
@@ -36,7 +41,7 @@ module update_data {
 
 module beacon_website {
   source = "./modules/website"
-  beacon_api_url = module.beacon_api.api_url
+  beacon_api_url = module.beacon_api.api_cloudfront_url
   domain_name = var.domain_name
   max_web_requests_per_ip_in_five_minutes = var.max_website_requests_per_ip_in_five_minutes
   production = var.production

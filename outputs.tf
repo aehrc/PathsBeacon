@@ -1,3 +1,7 @@
+output "cloudfront_api_url" {
+  value = module.beacon_api.api_cloudfront_url
+}
+
 output api_url {
   value = module.beacon_api.api_url
 }

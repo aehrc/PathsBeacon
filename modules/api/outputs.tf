@@ -1,3 +1,7 @@
+output api_cloudfront_url {
+  value = "https://${aws_cloudfront_distribution.api_cloudfront_distribution.domain_name}"
+  description = "URL for API hosted by cloudfront."
+}
 output api_url {
   value = aws_api_gateway_deployment.BeaconApi.invoke_url
   description = "URL used to invoke the API."
