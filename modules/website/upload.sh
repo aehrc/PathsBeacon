@@ -8,4 +8,4 @@ echo -e "export const environment = {\n production: true, \n cloudfront_url: \"$
 npm ci
 node_modules/@angular/cli/bin/ng build --prod --subresourceIntegrity=true
 cd dist/beaconApp
-aws s3 sync . "s3://${1}" --delete
+aws s3 sync --region "${5}" . "s3://${1}" --delete
