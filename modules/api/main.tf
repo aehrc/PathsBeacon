@@ -19,6 +19,7 @@ locals {
   cache_key = "cacheString"
   cache_loc = "s3Location"
   sample_metadata_suffix = "sample_metadata.json"
+  s3_region_endpoint = "s3.${data.aws_region.current.name}.amazonaws.com"
 }
 
 locals {
@@ -54,6 +55,7 @@ module lambda-submitDataset {
     variables = {
       DATASETS_TABLE = aws_dynamodb_table.datasets.name
       FLUSH_CACHE_SNS_TOPIC_ARN = aws_sns_topic.flushCache.arn
+      HTS_S3_HOST = local.s3_region_endpoint
       SUMMARISE_DATASET_SNS_TOPIC_ARN = aws_sns_topic.summariseDataset.arn
     }
   }
@@ -107,6 +109,7 @@ module "lambda-summariseVcf" {
 
   environment = {
     variables = {
+      HTS_S3_HOST = local.s3_region_endpoint
       SUMMARISE_SLICE_SNS_TOPIC_ARN = aws_sns_topic.summariseSlice.arn
       VCF_SUMMARIES_TABLE = aws_dynamodb_table.vcf_summaries.name
     }
@@ -135,6 +138,7 @@ module "lambda-summariseSlice" {
     variables = {
       ASSEMBLY_GSI = [for gsi in aws_dynamodb_table.datasets.global_secondary_index : gsi.name][0]
       DATASETS_TABLE = aws_dynamodb_table.datasets.name
+      HTS_S3_HOST = local.s3_region_endpoint
       SUMMARISE_DATASET_SNS_TOPIC_ARN = aws_sns_topic.summariseDataset.arn
       SUMMARISE_SLICE_SNS_TOPIC_ARN = aws_sns_topic.summariseSlice.arn
       VCF_SUMMARIES_TABLE = aws_dynamodb_table.vcf_summaries.name
@@ -225,6 +229,7 @@ module "lambda-queryDatasets" {
     {
       BEACON_ID = var.beacon-id
       DATASETS_TABLE = aws_dynamodb_table.datasets.name
+      HTS_S3_HOST = local.s3_region_endpoint
       RESPONSE_BUCKET = aws_s3_bucket.large_response_bucket.bucket
       COLLATE_QUERIES_LAMBDA = module.lambda-collateQueries.function_name
     },
@@ -285,6 +290,7 @@ module "lambda-performQuery" {
   environment = {
     variables = merge(
     {
+      HTS_S3_HOST = local.s3_region_endpoint
       MAX_SPLIT_SIZE = 1500
       RECURSION_FACTOR = 64
     },
