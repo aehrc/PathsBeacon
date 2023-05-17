@@ -35,10 +35,10 @@ resource aws_s3_bucket_cors_configuration datasets_artifacts {
   }
 }
 
-resource aws_s3_bucket_lifecycle_configuration datasets_artifacts {
-  bucket = aws_s3_bucket.dataset_artifacts.id
+resource aws_s3_bucket_lifecycle_configuration large_responses {
+  bucket = aws_s3_bucket.large_response_bucket.id
   rule {
-    id = "${aws_s3_bucket.dataset_artifacts.id}_lifecycle_rule"
+    id = "${aws_s3_bucket.large_response_bucket.id}_lifecycle_rule"
     status = "Enabled"
     expiration {
       days = 1
