@@ -12,7 +12,7 @@ import { AppConfigService } from '../../app.config.service';
 })
 export class LoginComponent implements OnInit {
   widget = new OktaSignIn({
-    baseUrl: 'https://dev-8520796.okta.com'
+    baseUrl: 'https://dev-08250124.okta.com'
   });
 
   constructor(private oktaAuth: OktaAuthService, router: Router, private appConfigService: AppConfigService) {
