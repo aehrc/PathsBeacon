@@ -24,3 +24,12 @@ variable response_bucket_domain {
   type = string
   description = "Domain used to access responses that are too large to be served by the API gateway. Does not include the https:// prefix."
 }
+
+variable okta_domain {
+  type = string
+  description = "Base url okta uses for authentication. In the form 'example.okta.com'."
+}
+
+variable okta_client_id {
+  type = string
+}

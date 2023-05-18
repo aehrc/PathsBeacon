@@ -63,9 +63,9 @@ PlotlyModule.plotlyjs = PlotlyJS;
     JwPaginationModule,
     PlotlyModule,
     OktaAuthModule.initAuth({
-      issuer: 'https://dev-08250124.okta.com/oauth2/default',
+      issuer: `${environment.okta.url}/oauth2/default`,
       redirectUri: `${environment.cloudfront_url}/implicit/callback`,
-      clientId: '0oa8nol2sy93CkD625d7'
+      clientId: environment.okta.clientId
     })
   ],
   providers: [

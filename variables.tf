@@ -40,3 +40,12 @@ variable production {
 variable bucket-name{
   type = string
 }
+
+variable okta_domain {
+  type = string
+  description = "Base url okta uses for authentication. In the form 'example.okta.com'."
+}
+
+variable okta_client_id {
+  type = string
+}

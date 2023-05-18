@@ -46,6 +46,8 @@ module beacon_website {
   max_web_requests_per_ip_in_five_minutes = var.max_website_requests_per_ip_in_five_minutes
   production = var.production
   response_bucket_domain = module.beacon_api.response_bucket_url
+  okta_domain = var.okta_domain
+  okta_client_id = var.okta_client_id
 
   providers = {
     aws = aws

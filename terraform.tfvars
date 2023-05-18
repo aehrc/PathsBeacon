@@ -5,3 +5,5 @@ organisation-id = "GSILAB"
 organisation-name = "GSILAB"
 bucket-name = "covid19-vcfs-gsilabs"
 production = false
+okta_domain = "dev-08250124.okta.com"
+okta_client_id = "0oa8nol2sy93CkD625d7"
