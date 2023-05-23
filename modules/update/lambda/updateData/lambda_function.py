@@ -7,6 +7,7 @@ import requests
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 import boto3
 
+AWS_REGION = os.environ['AWS_REGION']
 BEACON_URL = os.environ['BEACON_URL']
 aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
 aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
@@ -68,7 +69,7 @@ def lambda_handler(event, context):
         aws_secret_access_key=aws_secret_access_key,
         aws_token=aws_session_token,
         aws_host=api,
-        aws_region='ap-southeast-2',
+        aws_region=AWS_REGION,
         aws_service='execute-api',
     )
     print(json.dumps(payload))
