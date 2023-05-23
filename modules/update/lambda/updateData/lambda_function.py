@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import time
 
 import requests
@@ -18,6 +19,10 @@ def lambda_handler(event, context):
     print('Event Received: {}'.format(json.dumps(event)))
 
     bucket_name = event['Records'][0]['s3']['bucket']['name']
+    object_key = event['Records'][0]['s3']['object']['key']
+    if not re.fullmatch('^gisaid/gisaid0*\\.vcf\\.gz$', object_key):
+        print('Not main file, skipping')
+        return
     # Wait for other objects to finish being uploaded
     time.sleep(45)
     bucket = s3r.Bucket(bucket_name)
