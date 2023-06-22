@@ -359,7 +359,7 @@ export class MainComponent {
               const maxDatasetId: any = response.datasetAlleleResponses.sort((a, b) => b.callCount - a.callCount)[0];
               this.visualIndex = maxDatasetId.info.name;
               this.graphDataGenerator(this.hits, this.visualIndex);
-              this.statesData("Australia","AUS");
+              this.statesData("Indonesia","IDN");
               this.filteredArray = response.datasetAlleleResponses.filter(function(itm){
                 return itm.datasetId == 'gisaid';
               });
@@ -401,7 +401,7 @@ export class MainComponent {
           this.visualIndex = maxDatasetId.info.name;
           console.log(this.visualIndex);
           this.graphDataGenerator(this.hits, this.visualIndex);
-          this.statesData("Australia","AUS");
+          this.statesData("Indonesia","IDN");
           this.filteredArray = response.datasetAlleleResponses.filter(function(itm){
             return itm.datasetId == 'gisaid';
           });
