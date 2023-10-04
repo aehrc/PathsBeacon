@@ -12,10 +12,6 @@ provider aws {
 }
 
 provider aws {
-  alias = "apsoutheast3"
-  region = "ap-southeast-3"
-}
-provider aws {
   alias = "useast1"
   region = "us-east-1"
 }
