@@ -120,6 +120,7 @@ def call_perform_query(full_region_start, full_region_end, full_start_min,
     if (base_query['end_min'] > base_query['end_max']
             or max(full_region_start, full_start_min) > full_region_end):
         # Region search will find nothing, don't bother.
+        print("Searched region end will be before start, skipping search.")
         return
     subquery_iterator = get_subquery_iterator(
         full_region_start,
@@ -219,6 +220,7 @@ def perform_query(reference_bases, region, start_min, end_min, end_max, alternat
         '--format', '%POS\t%REF\t%ALT\t[%GT,]\n',
         vcf_location
     ]
+    print(f"Calling external process with args: {args}")
     query_process = subprocess.Popen(args, stdout=subprocess.PIPE, cwd='/tmp',
                                      encoding='ascii')
     v_prefix = '<{}'.format(variant_type)
@@ -231,7 +233,9 @@ def perform_query(reference_bases, region, start_min, end_min, end_max, alternat
     reference_matches = get_possible_codes(truncated_ref, iupac)
     alternate_matches = get_possible_codes(truncated_alt, iupac)
 
+    num_lines = 0
     for line in query_process.stdout:
+        num_lines += 1
         try:
             position, reference, all_alts, genotypes = line.split('\t')
         except ValueError as e:
@@ -332,6 +336,7 @@ def perform_query(reference_bases, region, start_min, end_min, end_max, alternat
                     name = name_variant(position, *ref_alts[hit])
                     variant_samples[name].update(samples)
 
+    print(f"Processed {num_lines} lines")
     query_process.stdout.close()
     return {
         'call_count': call_count,
