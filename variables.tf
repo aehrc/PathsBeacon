@@ -32,6 +32,11 @@ variable organisation-name {
   description = "Name of the organization providing the beacon."
 }
 
+variable assembly-contig-sizes {
+  type = map(map(number))
+  description = "A map of assemblies to maps of maximum contig sizes in nucleotides."
+}
+
 variable production {
   type = bool
   default = false

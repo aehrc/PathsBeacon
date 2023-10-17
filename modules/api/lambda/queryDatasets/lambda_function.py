@@ -7,15 +7,22 @@ from api_response import bad_request, bundle_response, missing_parameter
 from aws_utils import DynamodbClient, LambdaClient, S3Client
 from cache_utils import Caches
 
+
+ASSEMBLY_CONTIG_SIZES = json.loads(os.environ['ASSEMBLY_CONTIG_SIZES'])
+# This will look like:
+# {
+#     "assembly": {
+#       "contig": number_of_nucleotides,
+#       ...
+#     },
+#     ...
+# }
+
 BEACON_ID = os.environ['BEACON_ID']
 DATASETS_TABLE_NAME = os.environ['DATASETS_TABLE']
-MAX_COORD = 32000
 MAXIMUM_RESPONSE_SIZE = 5000000
 MIN_COORD = -1
 RESPONSE_BUCKET = os.environ['RESPONSE_BUCKET']
-CHROMOSOMES = [
-    "1"
-]
 COLLATE_QUERIES = os.environ['COLLATE_QUERIES_LAMBDA']
 
 INCLUDE_DATASETS_VALUES = {
@@ -70,7 +77,7 @@ def check_size(response, context):
     return response
 
 
-def get_datasets(assembly_id, reference_names, dataset_ids):
+def get_datasets(assembly_id, dataset_ids):
     datasets = dynamodb.query(
         TableName=DATASETS_TABLE_NAME,
         IndexName='assembly_index',
@@ -88,13 +95,10 @@ def get_datasets(assembly_id, reference_names, dataset_ids):
     )
     if dataset_ids:
         datasets = [i for i in datasets if i['id']['S'] in dataset_ids]
-    vcf_chromosomes = get_vcf_chromosome_map(datasets, reference_names)
     translated_datasets = []
     for dataset in datasets:
         dataset_id = dataset['id']['S']
-        vcf_locations = {vcf: vcf_chromosomes[vcf]
-                         for vcf in dataset['vcfLocations']['SS']
-                         if vcf_chromosomes[vcf]}
+        vcf_locations = dataset['vcfLocations']['SS']
         annotation_location = dataset.get('annotationLocation',
                                           {'S': None})['S']
         try:
@@ -156,7 +160,7 @@ def get_queries(multi_values):
     ]
 
 
-def get_query_details_list(queries):
+def get_query_details_list(queries, contig_sizes):
     query_details_list = []
     for query_parameters in queries:
         start = query_parameters.get('start')
@@ -183,13 +187,15 @@ def get_query_details_list(queries):
         end_max += 1
         # Don't allow arbitrarily large region queries
         region_start = max(region_start, MIN_COORD)
-        region_end = min(region_end, MAX_COORD)
+        contig = query_parameters['referenceName']
+        region_end = min(region_end, contig_sizes[contig])
         if reference_bases != 'N':
             # For specific reference bases region may be smaller
             max_offset = len(reference_bases) - 1
             end_max = min(region_end + max_offset, end_max)
             region_start = max(end_min - max_offset, region_start)
         query_details_list.append({
+            'contig': contig,
             'region_start': region_start,
             'region_end': region_end,
             'start_min': start_min,
@@ -200,22 +206,6 @@ def get_query_details_list(queries):
             'variant_type': query_parameters.get('variantType'),
         })
     return query_details_list
-
-
-def get_vcf_chromosome_map(datasets, chromosomes):
-    all_vcfs = list(set(
-        loc
-        for d in datasets
-        for loc in d['vcfLocations']['SS']
-    ))
-    vcf_chromosome_map = {}
-    for vcf in all_vcfs:
-        vcf_chromosome_map[vcf] = [
-            "1"
-            # We know each VCF contains only one chromosome, "1"
-            for _ in chromosomes
-        ]
-    return vcf_chromosome_map
 
 
 def int_or_self(prospective_int):
@@ -243,14 +233,10 @@ def query_datasets(parameters, context):
     )
     datasets = get_datasets(
         parameters['assemblyId'],
-        [
-            query['referenceName']
-            for query in parameters['queries']
-        ],
         parameters.get('datasetIds'),
     )
-
-    query_details_list = get_query_details_list(parameters['queries'])
+    contig_sizes = ASSEMBLY_CONTIG_SIZES[parameters['assemblyId']]
+    query_details_list = get_query_details_list(parameters['queries'], contig_sizes)
     page_details = {
         'page': parameters.get('page', 1),
         'page_size': parameters.get('pageSize'),
@@ -285,7 +271,7 @@ def query_datasets(parameters, context):
     return bundle_response(200, response_dict)
 
 
-def validate_queries(queries):
+def validate_queries(queries, assembly_id):
     if not queries:
         return "At least one query must be present"
     for parameters in queries:
@@ -296,8 +282,9 @@ def validate_queries(queries):
             return missing_parameter('referenceName')
         if not isinstance(reference_name, str):
             return "referenceName must be a string"
-        if reference_name not in CHROMOSOMES:
-            return "referenceName must be one of {}".format(','.join(CHROMOSOMES))
+        contigs =  ASSEMBLY_CONTIG_SIZES[assembly_id].keys()
+        if reference_name not in contigs:
+            return f"For assemblyId={assembly_id}, referenceName must be one of {','.join(contigs)}"
 
         try:
             reference_bases = parameters['referenceBases']
@@ -387,10 +374,6 @@ def validate_queries(queries):
 
 
 def validate_request(parameters):
-    queries = parameters['queries']
-    query_errors = validate_queries(queries)
-    if query_errors:
-        return query_errors
     missing_parameters = set()
 
     try:
@@ -399,6 +382,13 @@ def validate_request(parameters):
         return missing_parameter('assemblyId')
     if not isinstance(assembly_id, str):
         return "assemblyId must be a string"
+    if assembly_id not in ASSEMBLY_CONTIG_SIZES:
+        return f"assemblyId must be one of {', '.join(ASSEMBLY_CONTIG_SIZES.keys())}"
+
+    queries = parameters['queries']
+    query_errors = validate_queries(queries, assembly_id)
+    if query_errors:
+        return query_errors
 
     dataset_ids = parameters.get('datasetIds')
     if dataset_ids is None:

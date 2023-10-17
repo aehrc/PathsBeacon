@@ -79,8 +79,8 @@ def call_perform_query(responses, vcf_locations, query_details_list, iupac):
     for i, details in enumerate(query_details_list):
         kwargs = {
             'vcf_locations': [
-                [vcf_i, vcf, chroms[i]]
-                for vcf_i, (vcf, chroms) in enumerate(vcf_locations.items())
+                [vcf_i, vcf]
+                for vcf_i, vcf in enumerate(vcf_locations)
             ],
             'iupac': iupac,
             **details,

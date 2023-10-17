@@ -22,6 +22,7 @@ module beacon_api {
   beacon-name = var.beacon-name
   organisation-id = var.organisation-id
   organisation-name = var.organisation-name
+  assembly-contig-sizes = var.assembly-contig-sizes
 
   providers = {
     aws = aws

@@ -212,11 +212,11 @@ def name_variant(pos, ref, alt):
     return f'{ref}{pos}{alt}'
 
 
-def perform_query(reference_bases, region, start_min, end_min, end_max, alternate_bases,
-                  variant_type, vcf_i, vcf_location, iupac):
+def perform_query(contig, region_start, region_end, reference_bases, start_min, end_min,
+                  end_max, alternate_bases, variant_type, vcf_i, vcf_location, iupac):
     args = [
         'bcftools', 'query',
-        '--regions', region,
+        '--regions', f'{contig}:{region_start}-{region_end}',
         '--format', '%POS\t%REF\t%ALT\t[%GT,]\n',
         vcf_location
     ]
@@ -381,11 +381,13 @@ def split_query(region_start, region_end, start_min, vcf_locations, base_query, 
 
 def lambda_handler(event, context):
     print('Event Received: {}'.format(json.dumps(event)))
+    contig = event['contig']
     region_start = event['region_start']
     region_end = event['region_end']
     start_min = event['start_min']
     vcf_locations = event['vcf_locations']
     base_query = {
+        'contig': contig,
         'reference_bases': event['reference_bases'],
         'end_min': event['end_min'],
         'end_max': event['end_max'],
@@ -394,9 +396,10 @@ def lambda_handler(event, context):
         'iupac': event['iupac'],
     }
     if len(vcf_locations) == 1 and region_end - region_start + 1 <= MAX_SPLIT_SIZE:
-        vcf_i, vcf_location, contig = vcf_locations[0]
+        vcf_i, vcf_location = vcf_locations[0]
         raw_response = perform_query(
-            region=f'{contig}:{region_start}-{region_end}',
+            region_start=region_start,
+            region_end=region_end,
             start_min=start_min,
             vcf_i=vcf_i,
             vcf_location=vcf_location,

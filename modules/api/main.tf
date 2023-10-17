@@ -227,6 +227,7 @@ module "lambda-queryDatasets" {
   environment = {
     variables = merge(
     {
+      ASSEMBLY_CONTIG_SIZES = jsonencode(var.assembly-contig-sizes)
       BEACON_ID = var.beacon-id
       DATASETS_TABLE = aws_dynamodb_table.datasets.name
       HTS_S3_HOST = local.s3_region_endpoint

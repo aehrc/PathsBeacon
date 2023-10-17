@@ -23,6 +23,11 @@ variable organisation-name {
   description = "Name of the organization providing the beacon."
 }
 
+variable assembly-contig-sizes {
+  type = map(map(number))
+  description = "A map of assemblies to maps of maximum contig sizes in nucleotides."
+}
+
 variable common-tags {
   type = map(string)
   description = "A set of tags to attach to every created resource."
