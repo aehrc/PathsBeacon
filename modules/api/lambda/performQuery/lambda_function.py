@@ -208,8 +208,8 @@ def get_subquery_iterator(region_start, region_end, start_min, vcf_locations):
         split_start = split_start_min = split_end + 1
 
 
-def name_variant(pos, ref, alt):
-    return f'{ref}{pos}{alt}'
+def name_variant(contig, pos, ref, alt):
+    return f'{contig}:{ref}{pos}{alt}'
 
 
 def perform_query(contig, region_start, region_end, reference_bases, start_min, end_min,
@@ -333,7 +333,7 @@ def perform_query(contig, region_start, region_end, reference_bases, start_min, 
                 all_hits = variant_genotypes.alt_indexes(genotype)
                 for hit in all_hits & hit_indexes:
                     hit_samples.update(samples)
-                    name = name_variant(position, *ref_alts[hit])
+                    name = name_variant(contig, position, *ref_alts[hit])
                     variant_samples[name].update(samples)
 
     print(f"Processed {num_lines} lines")

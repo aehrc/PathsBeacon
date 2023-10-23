@@ -50,10 +50,11 @@ def get_minimum_set(part_samples):
 
 def annotate_variants(variant_counts, all_annotations, dataset_sample_count):
     annotations = []
-    variant_pattern = re.compile('([^0-9]+)([0-9]+)(.+)')
+    variant_pattern = re.compile('([^:]+):([^0-9]+)([0-9]+)(.+)')
     for variant, sample_count in variant_counts.items():
-        ref, pos, alt = variant_pattern.fullmatch(variant).groups()
+        contig, ref, pos, alt = variant_pattern.fullmatch(variant).groups()
         annotations.append({
+            'contig': contig,
             'pos': int(pos),
             'ref': ref,
             'alt': alt,
