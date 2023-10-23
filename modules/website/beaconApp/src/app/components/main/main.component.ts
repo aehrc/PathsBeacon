@@ -52,6 +52,7 @@ export class MainComponent {
   sPos= [];
   splittedText= [];
   visualIndex: number;
+  assemblyId: string = "";
   ref = "";
   alt = "";
   referenceName = [];
@@ -280,6 +281,7 @@ export class MainComponent {
   }
 
   query() {
+      this.assemblyId = 'hCoV-19';
       this.start = [];
       this.refBases = [];
       this.altBases = [];
@@ -302,26 +304,30 @@ export class MainComponent {
 
         try {
           let text = this.inputText.replace(/\&/g, ':');
+          if (text.includes('~')) {  // Using ~ as a delimiter for assemblyId
+            [this.assemblyId, text] = text.split('~');
+          }
           this.splittedText = text.split(':');
           console.log(this.splittedText);
           if(this.splittedText.length == 1){
-            var regex = /([a-z]+)(\d+)([a-z]+)/gi;
-            var match = regex.exec(this.inputText);
-            this.start.push((parseInt(match[2])-1).toString());
-            this.refBases.push((match[1].trim()).toUpperCase());
-            this.altBases.push((match[3].trim()).toUpperCase());
-            this.refName.push("1");
-            this.phylogenyPos.push((parseInt(match[2])).toString() + (match[3].trim()).toUpperCase());
-          }else{
+            var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
+            let query = regex.exec(text).groups;
 
+            this.refName.push(query.refName.trim() || "1");
+            this.start.push((parseInt(query.start)-1).toString());
+            this.refBases.push((query.refBases.trim()).toUpperCase());
+            this.altBases.push((query.altBases.trim()).toUpperCase());
+            this.phylogenyPos.push((parseInt(query.start)).toString() + (query.altBases.trim()).toUpperCase());
+          }else{
             for(var i = 0; i < this.splittedText.length; i++){
-              var regex = /([a-z]+)(\d+)([a-z]+)/gi;
-              var match = regex.exec(this.splittedText[i]);
-              this.start.push((parseInt(match[2])-1).toString());
-              this.refBases.push((match[1].trim()).toUpperCase());
-              this.altBases.push((match[3].trim()).toUpperCase());
-              this.refName.push("1");
-              this.phylogenyPos.push((parseInt(match[2])).toString() + (match[3].trim()).toUpperCase());
+              var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
+              let query = regex.exec(this.splittedText[i]).groups;
+
+              this.refName.push(query.refName.trim() || "1");
+              this.start.push((parseInt(query.start)-1).toString());
+              this.refBases.push((query.refBases.trim()).toUpperCase());
+              this.altBases.push((query.altBases.trim()).toUpperCase());
+              this.phylogenyPos.push((parseInt(query.start)).toString() + (query.altBases.trim()).toUpperCase());
             }
           }
 
@@ -332,7 +338,7 @@ export class MainComponent {
           return;
         }
 
-        this.queryData = {"assemblyId": "hCoV-19","includeDatasetResponses":"ALL", "referenceName": this.refName, "start": this.start, "referenceBases": this.refBases, "alternateBases": this.altBases,  "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate"]};
+        this.queryData = {"assemblyId": this.assemblyId,"includeDatasetResponses":"ALL", "referenceName": this.refName, "start": this.start, "referenceBases": this.refBases, "alternateBases": this.altBases,  "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate"]};
       }
 
       this.url = this.rootUrl+ "/query";

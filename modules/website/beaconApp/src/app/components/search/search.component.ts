@@ -20,6 +20,7 @@ export class SearchComponent implements OnInit {
   splitText= [];
   textDict = {};
   queryData = {};
+  assemblyId: string = "";
   start = [];
   refBases = [];
   altBases = [];
@@ -101,6 +102,7 @@ export class SearchComponent implements OnInit {
   }
 
   profileSearch(){
+    this.assemblyId = 'hCoV-19';
     this.start = [];
     this.refBases = [];
     this.altBases = [];
@@ -110,26 +112,29 @@ export class SearchComponent implements OnInit {
 
     try {
       let text = this.profileText.replace(/\&/g, ':');
+      if (text.includes('~')) {  // Using ~ as a delimiter for assemblyId
+        [this.assemblyId, text] = text.split('~');
+      }
       this.splittedText = text.split(':');
       console.log(this.splittedText);
       if(this.splittedText.length == 1){
-        var regex = /([a-z]+)(\d+)([a-z]+)/gi;
-        var match = regex.exec(this.profileText);
+          var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
+          let query = regex.exec(text).groups;
 
-        this.start.push((parseInt(match[2])-1).toString());
-        this.refBases.push((match[1].trim()).toUpperCase());
-        this.altBases.push((match[3].trim()).toUpperCase());
-        this.refName.push("1");
+          this.refName.push(query.refName.trim() || "1");
+          this.start.push((parseInt(query.start)-1).toString());
+          this.refBases.push((query.refBases.trim()).toUpperCase());
+          this.altBases.push((query.altBases.trim()).toUpperCase());
       }else{
 
         for(var i = 0; i < this.splittedText.length; i++){
-          var regex = /([a-z]+)(\d+)([a-z]+)/gi;
-          var match = regex.exec(this.splittedText[i]);
+          var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
+          let query = regex.exec(this.splittedText[i]).groups;
 
-          this.start.push((parseInt(match[2])-1).toString());
-          this.refBases.push((match[1].trim()).toUpperCase());
-          this.altBases.push((match[3].trim()).toUpperCase());
-          this.refName.push("1");
+          this.refName.push(query.refName.trim() || "1");
+          this.start.push((parseInt(query.start)-1).toString());
+          this.refBases.push((query.refBases.trim()).toUpperCase());
+          this.altBases.push((query.altBases.trim()).toUpperCase());
         }
       }
 
@@ -141,7 +146,7 @@ export class SearchComponent implements OnInit {
     }
 
     this.queryData = {
-      "assemblyId": "hCoV-19",
+      "assemblyId": this.assemblyId,
       "includeDatasetResponses": "ALL",
       "referenceName": this.refName,
       "start": this.start,
