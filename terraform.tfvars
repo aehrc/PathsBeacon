@@ -10,6 +10,10 @@ assembly-contig-sizes = {
   "H37Rv" = {
     "NC_000962.3" = 4500000
   }
+  "ASM1303007v1" = {
+    "NZ_AP023069.1" = 2200000
+    "NZ_AP023070.1" = 4200
+  }
 }
 bucket-name = "covid19-vcfs-dev"
 production = false
