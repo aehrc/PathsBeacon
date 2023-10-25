@@ -175,6 +175,7 @@
 							<div class="example-element-detail" *ngIf="element.info.variants?.length" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
 								<div class="inner-table mat-elevation-z8" *ngIf="expandedElement">
 									<table class="table table-striped table-bordered table-hover" id="t03" matSort (matSortChange)="sortData($event, element)">
+										<th mat-sort-header="contig" title ="Searched variants contig.">Contig</th>
 										<th mat-sort-header="position" title ="Searched variants position.">Position</th>
 									  <th mat-sort-header="ref" title ="Searched reference variants.">Ref</th>
 									  <th mat-sort-header="alt" title ="Searched alternate variants.">Alt</th>
@@ -183,6 +184,7 @@
 									  <th mat-sort-header="frequency" title ="Samples/Total samples for this variant">Frequency</th>
 										<tbody *ngIf="element.info.variants.length < 10">
 										  <tr   *ngFor="let item of element.info.variants">
+										    <td > {{item.contig}} </td>
 										    <td > {{item.pos}} </td>
 										    <td > {{ item.ref }} </td>
 										    <td > {{ item.alt }} </td>
@@ -193,6 +195,7 @@
 										</tbody>
 										<tbody *ngIf="element.info.variants.length > 10">
 										  <tr   *ngFor="let item of pageOfItems;">
+										    <td > {{item.contig}} </td>
 										    <td > {{item.pos}} </td>
 										    <td > {{ item.ref }} </td>
 										    <td > {{ item.alt }} </td>

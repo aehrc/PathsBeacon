@@ -71,7 +71,7 @@ export class MainComponent {
   warning: string = '';
   alertMessage: string = '';
   displayedColumns: string[] = ['expand','name', 'updateDateTime', 'variantCount', 'callCount', 'sampleCount', 'totalSamples', 'frequency', 'accessions'];
-  innerDisplayedColumns: string[] = ['pos', 'ref', 'alt', 'SIFT_score', 'subSampleCount', 'subFrequency'];
+  innerDisplayedColumns: string[] = ['contig', 'pos', 'ref', 'alt', 'SIFT_score', 'subSampleCount', 'subFrequency'];
   sampleData:{ code: string, value: any, breakup: any}[] = [];
   dateData:{ date: string, value: any, breakup: any, location: string}[] = [];
   hashState={};
@@ -140,6 +140,7 @@ export class MainComponent {
         this.hits[i].info.variants = data.sort((a, b) => {
           const isAsc = sort.direction === 'asc';
           switch (sort.active) {
+            case 'contig': return this.compare(a.contig, b.contig, isAsc);
             case 'position': return this.compare(a.pos, b.pos, isAsc);
             case 'ref': return this.compare(a.ref, b.ref, isAsc);
             case 'alt': return this.compare(a.alt, b.alt, isAsc);
