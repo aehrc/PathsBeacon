@@ -121,7 +121,7 @@ export class SearchComponent implements OnInit {
           var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
           let query = regex.exec(text).groups;
 
-          this.refName.push(query.refName.trim() || "1");
+          this.refName.push((query.refName || "1").trim());
           this.start.push((parseInt(query.start)-1).toString());
           this.refBases.push((query.refBases.trim()).toUpperCase());
           this.altBases.push((query.altBases.trim()).toUpperCase());
@@ -131,7 +131,7 @@ export class SearchComponent implements OnInit {
           var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
           let query = regex.exec(this.splittedText[i]).groups;
 
-          this.refName.push(query.refName.trim() || "1");
+          this.refName.push((query.refName || "1").trim());
           this.start.push((parseInt(query.start)-1).toString());
           this.refBases.push((query.refBases.trim()).toUpperCase());
           this.altBases.push((query.altBases.trim()).toUpperCase());
