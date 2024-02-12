@@ -112,7 +112,7 @@ export class MainComponent {
   navigate(){
     console.log(this.start);
     console.log(this.phylogenyPos.join(","));
-    this.externalLink = "https://nextstrain.org/ncov/gisaid/global?gt=nuc."+ this.phylogenyPos.join(",") +"&m=div";
+    this.externalLink = "https://nextstrain.org/ncov/gisaid/global/all-time?gt=nuc."+ this.phylogenyPos.join(",") +"&m=div";
     console.log(this.externalLink);
 
     window.open(this.externalLink ,"_blank")
