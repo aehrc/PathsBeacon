@@ -233,7 +233,7 @@
 			<!--<button mat-raised-button color="primary" class="button" (click)="stateVisilble = !stateVisilble">Toggle State Data</button>-->
 			<mat-card class="example-card" >
 				<mat-card-content *ngIf="states.length">
-				<table  class="table table-striped table-bordered table-hover" matSort (matSortChange)="stateSortData($event)" >
+				<table  class="table table-striped table-bordered table-hover" matSort (matSortChange)="stateSortData($event, states)" >
 					<thead>
 						<tr>
 							<th mat-sort-header="regions" title="Country and Regions"> Country / Region</th>
@@ -253,6 +253,25 @@
 						<jw-pagination [items]="states"  (changePage)="onChangeStatePage($event)"></jw-pagination>
 				</div>
 				</mat-card-content >
+				<mat-card-content *ngIf="patientStatus.length">
+					<table class="table table-striped table-bordered table-hover" matSort
+						(matSortChange)="stateSortData($event, patientStatus)">
+						<thead>
+							<tr>
+								<th mat-sort-header="attribute" title="Attribute in patients' metadata"> Patient Attribute</th>
+								<th mat-sort-header="total" title="Number of occurences and total count"> Count / Total </th>
+								<th mat-sort-header="percentage" title="Percentage occurences of the attribute."> Frequency </th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr *ngFor="let item of patientStatus; track item">
+								<td> {{item.attribute}} </td>
+								<td> {{ item.occurences }} / {{ item.total }} </td>
+								<td> {{ item.percentage | number:'1.3-3' }}% </td>
+							</tr>
+						</tbody>
+					</table>
+					</mat-card-content >
 				<mat-card-content *ngIf="!states.length">
 					<span> No Regions data available for the searched variants</span>
 				</mat-card-content>

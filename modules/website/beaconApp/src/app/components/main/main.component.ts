@@ -84,6 +84,7 @@ export class MainComponent {
   vis: number = 0;
   pageOfItems: Array<any>;
   statePageOfItems: Array<any>;
+  patientStatus: Array<any> = [];
   externalLink = "";
 
 
@@ -155,23 +156,12 @@ export class MainComponent {
     }
   }
 
-  stateSortData(sort: Sort) {
-    const data = this.states.slice();
-    if (!sort.active || sort.direction === '') {
-      this.states = data;
-      return;
-    }
-
-    this.states = data.sort((a, b) => {
-      const isAsc = sort.direction === 'asc';
-      switch (sort.active) {
-        case 'regions': return this.compare(a.regions, b.regions, isAsc);
-        case 'count': return this.compare(a.count, b.count, isAsc);
-        case 'frequency': return this.compare(a.frequency, b.frequency, isAsc);
-        default: return 0;
-      }
-    });
+  stateSortData(sort: Sort, entries: any[]) {
+    entries.sort((a, b) =>
+      this.compare(a[sort.active] || 0, b[sort.active] || 0, sort.direction === "asc")
+    );
   }
+  
   onChangePage(pageOfItems: Array<any>) {
 
         // update current page of items
@@ -295,11 +285,11 @@ export class MainComponent {
 
           if(this.varType != null ){
             this.alt = null;
-            this.queryData = {"assemblyId": "hCoV-19","includeDatasetResponses":"ALL", "referenceName": "1", "referenceBases": this.ref.toUpperCase(), "startMin":(this.sMin-1).toString(), "startMax": (this.sMax-1).toString(), "endMin": (this.eMin-1).toString(), "endMax": (this.eMax-1).toString(), "variantType": this.varType.toUpperCase(), "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate"]};
+            this.queryData = {"assemblyId": "hCoV-19","includeDatasetResponses":"ALL", "referenceName": "1", "referenceBases": this.ref.toUpperCase(), "startMin":(this.sMin-1).toString(), "startMax": (this.sMax-1).toString(), "endMin": (this.eMin-1).toString(), "endMax": (this.eMax-1).toString(), "variantType": this.varType.toUpperCase(), "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate", "Patient.Status"]};
           }
           if(this.alt != null ){
             this.varType = null;
-            this.queryData = {"assemblyId": "hCoV-19","includeDatasetResponses":"ALL", "referenceName": "1", "referenceBases": this.ref.toUpperCase(), "alternateBases": this.alt.toUpperCase(), "startMin":(this.sMin-1).toString(), "startMax": (this.sMax-1).toString(), "endMin": (this.eMin-1).toString(), "endMax": (this.eMax-1).toString(), "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate"]};
+            this.queryData = {"assemblyId": "hCoV-19","includeDatasetResponses":"ALL", "referenceName": "1", "referenceBases": this.ref.toUpperCase(), "alternateBases": this.alt.toUpperCase(), "startMin":(this.sMin-1).toString(), "startMax": (this.sMax-1).toString(), "endMin": (this.eMin-1).toString(), "endMax": (this.eMax-1).toString(), "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate", "Patient.Status"]};
           }
       }else if( this.inputText != null){
 
@@ -339,12 +329,55 @@ export class MainComponent {
           return;
         }
 
-        this.queryData = {"assemblyId": this.assemblyId,"includeDatasetResponses":"ALL", "referenceName": this.refName, "start": this.start, "referenceBases": this.refBases, "alternateBases": this.altBases,  "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate"]};
+        this.queryData = {
+          assemblyId: this.assemblyId,
+          includeDatasetResponses: "ALL",
+          referenceName: this.refName,
+          start: this.start,
+          referenceBases: this.refBases,
+          alternateBases: this.altBases,
+          iupac: this.iupac_input,
+          sampleFields: [
+            "SampleCollectionDate",
+            "Location",
+            "State",
+            "Location_SampleCollectionDate",
+            "State_SampleCollectionDate",
+            "Patient.Status",
+          ],
+        };
       }
 
       this.url = this.rootUrl+ "/query";
       console.log(this.queryData);
       this.getData(this.url,this.queryData);
+  }
+
+  reduceMetadata() {
+    const jsonArray = this.hits.map((entry: any) => entry.info.sampleCounts['Patient.Status'] || {});
+    const result = jsonArray.reduce((accumulator, current) => {
+      Object.keys(current).forEach(key => {
+        const currentResult = current[key] || [0, 0];
+        if (accumulator[key]) {
+          accumulator[key][0] += currentResult[0];
+          accumulator[key][1] += currentResult[1];
+        } else {
+          accumulator[key] = currentResult;
+        }
+      });
+      return accumulator;
+    }, {});
+    this.patientStatus = [];
+    Object.entries(result).forEach(([key, value]: [string, number[]]) => {
+      if (value[1] > 0) {
+        this.patientStatus.push({
+          attribute: key,
+          occurences: value[0],
+          total: value[1],
+          percentage: 100.0 * value[0] / value[1],
+        });
+      }
+    });
   }
 
   getData(url, qData){
@@ -365,6 +398,7 @@ export class MainComponent {
               this.loading = false;
               const maxDatasetId: any = response.datasetAlleleResponses.sort((a, b) => b.callCount - a.callCount)[0];
               this.visualIndex = maxDatasetId.info.name;
+              this.reduceMetadata();
               this.graphDataGenerator(this.hits, this.visualIndex);
               this.statesData("Indonesia","IDN");
               this.filteredArray = response.datasetAlleleResponses.filter(function(itm){
@@ -407,6 +441,7 @@ export class MainComponent {
           const maxDatasetId: any = response.datasetAlleleResponses.sort((a, b) => b.callCount - a.callCount)[0];
           this.visualIndex = maxDatasetId.info.name;
           console.log(this.visualIndex);
+          this.reduceMetadata();
           this.graphDataGenerator(this.hits, this.visualIndex);
           this.statesData("Indonesia","IDN");
           this.filteredArray = response.datasetAlleleResponses.filter(function(itm){
