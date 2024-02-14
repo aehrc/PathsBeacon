@@ -5,6 +5,7 @@ echo -e "{\n \"apiBaseUrl\": \"${2}\",\n \"login\": ${3}\n}" > src/assets/config
 mkdir -p src/environments
 echo -e "export const environment = {\n production: true, \n cloudfront_url: \"${4}\",\n okta: {\n  url: \"https://${6}\",\n  clientId: \"${7}\"\n }\n};" > src/environments/environment.ts
 cp src/environments/environment.ts src/environments/environment.prod.ts
+export NODE_OPTIONS=--openssl-legacy-provider
 npm ci
 node_modules/@angular/cli/bin/ng build --prod --subresourceIntegrity=true
 cd dist/beaconApp
