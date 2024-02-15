@@ -161,7 +161,7 @@ export class MainComponent {
       this.compare(a[sort.active] || 0, b[sort.active] || 0, sort.direction === "asc")
     );
   }
-  
+
   onChangePage(pageOfItems: Array<any>) {
 
         // update current page of items
@@ -368,13 +368,32 @@ export class MainComponent {
       return accumulator;
     }, {});
     this.patientStatus = [];
+    // Grab the totals from first principles, in case there's some weirdness in the main sample counts
+    let varSamples = Object.values(result).reduce<number>((sum, value) => sum + value[0], 0)
+    let noVarSamples = Object.values(result).reduce<number>((sum, value) => sum + value[1], 0) - varSamples
     Object.entries(result).forEach(([key, value]: [string, number[]]) => {
       if (value[1] > 0) {
+        let casesWithVar = value[0];
+        let casesNoVar = value[1] - casesWithVar;
+        let controlsWithVar = varSamples - casesWithVar;
+        let controlsNoVar = noVarSamples - casesNoVar;
+        if (casesWithVar == 0 || casesNoVar == 0 || controlsWithVar == 0 || controlsNoVar == 0) {
+          // perform Haldane-Anscombe correction
+          casesWithVar += 0.5;
+          casesNoVar += 0.5;
+          controlsWithVar += 0.5;
+          controlsNoVar += 0.5;
+        }
+        let logOddsRatioVal = Math.log((casesWithVar*controlsNoVar) / (casesNoVar*controlsWithVar))
+        let logOddsErrorVal = 1.96 * Math.sqrt(1/casesWithVar + 1/casesNoVar + 1/controlsWithVar + 1/controlsNoVar)
         this.patientStatus.push({
           attribute: key,
-          occurences: value[0],
+          occurrences: value[0],
           total: value[1],
           percentage: 100.0 * value[0] / value[1],
+          logOddsRatio: logOddsRatioVal,
+          logOddsError: logOddsErrorVal,
+          significant: Math.abs(logOddsRatioVal) > logOddsErrorVal,
         });
       }
     });
