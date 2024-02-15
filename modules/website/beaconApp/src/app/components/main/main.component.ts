@@ -53,6 +53,7 @@ export class MainComponent {
   splittedText= [];
   visualIndex: number;
   assemblyId: string = "";
+  queryCombination: string | null = null;
   ref = "";
   alt = "";
   referenceName = [];
@@ -289,6 +290,39 @@ export class MainComponent {
     }
   }
 
+  parseMutationExpression(expression: string): [string, any[]] {
+    const _expression = expression.replace(/\s/g,"");
+    const varRegex =
+      /^((?<refName>[0-9a-zA-Z]+)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/i;
+    const logicRegex = /[!&:()|]/;
+    const queries: any[] = [];
+    let combination: string = "";
+    let index: number = 0;
+
+    for (let pos = 0; pos < _expression.length; pos++) {
+      const char = _expression[pos];
+
+      if (char.match(logicRegex)) {
+        // consume the groupings (parenthesis) and logic (!|)
+        combination += char == ":" ? "&" : char;
+      } else {
+        // consume the mutation
+        const remainder = _expression.slice(pos);
+        const matches: any = remainder.match(varRegex);
+        // must have a match starting here else skip
+        if (matches) {
+          queries.push(matches.groups);
+          combination += index.toString();
+          // jump over the match and increment index
+          pos += matches[0].length - 1;
+          index += 1;
+        }
+      }
+    }
+
+    return [combination, queries];
+  }
+
   query() {
       this.assemblyId = 'hCoV-19';
       this.start = [];
@@ -312,35 +346,25 @@ export class MainComponent {
       }else if( this.inputText != null){
 
         try {
-          let text = this.inputText.replace(/\&/g, ':');
-          if (text.includes('~')) {  // Using ~ as a delimiter for assemblyId
-            [this.assemblyId, text] = text.split('~');
+          let text = this.inputText.replace(/\&/g, ":");
+          if (text.includes("~")) {
+            // Using ~ as a delimiter for assemblyId
+            [this.assemblyId, text] = text.split("~");
           }
-          this.splittedText = text.split(':');
-          console.log(this.splittedText);
-          if(this.splittedText.length == 1){
-            var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
-            let query = regex.exec(text).groups;
+          const [queryCombination, queries] =
+            this.parseMutationExpression(text);
+          this.queryCombination = queryCombination;
 
-            this.refName.push((query.refName || "1").trim());
-            this.start.push((parseInt(query.start)-1).toString());
-            this.refBases.push((query.refBases.trim()).toUpperCase());
-            this.altBases.push((query.altBases.trim()).toUpperCase());
-            this.phylogenyPos.push((parseInt(query.start)).toString() + (query.altBases.trim()).toUpperCase());
-          }else{
-            for(var i = 0; i < this.splittedText.length; i++){
-              var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
-              let query = regex.exec(this.splittedText[i]).groups;
-
-              this.refName.push((query.refName || "1").trim());
-              this.start.push((parseInt(query.start)-1).toString());
-              this.refBases.push((query.refBases.trim()).toUpperCase());
-              this.altBases.push((query.altBases.trim()).toUpperCase());
-              this.phylogenyPos.push((parseInt(query.start)).toString() + (query.altBases.trim()).toUpperCase());
-            }
-          }
-
-        }
+          queries.forEach((query: any) => {
+            this.refName.push(query.refName || "1");
+            this.start.push((parseInt(query.start) - 1).toString());
+            this.refBases.push(query.refBases.toUpperCase());
+            this.altBases.push(query.altBases.toUpperCase());
+            this.phylogenyPos.push(
+              `${query.start}${query.altBases.toUpperCase()}`
+            );
+          });
+        } 
         catch(err) {
           this.warning = "Incorrect search formatting - Please enter valid position.";
           this.loading = false;
@@ -364,6 +388,10 @@ export class MainComponent {
             "Patient.Status",
           ],
         };
+
+        if (this.queryCombination) {
+          this.queryData['queryCombination'] = this.queryCombination;
+        }
       }
 
       this.url = this.rootUrl+ "/query";
