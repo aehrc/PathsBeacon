@@ -156,7 +156,25 @@ export class MainComponent {
     }
   }
 
-  stateSortData(sort: Sort, entries: any[]) {
+  stateSortData(sort: Sort) {
+    const data = this.states.slice();
+    if (!sort.active || sort.direction === '') {
+      this.states = data;
+      return;
+    }
+
+    this.states = data.sort((a, b) => {
+      const isAsc = sort.direction === 'asc';
+      switch (sort.active) {
+        case 'regions': return this.compare(a.regions, b.regions, isAsc);
+        case 'count': return this.compare(a.count, b.count, isAsc);
+        case 'frequency': return this.compare(a.frequency, b.frequency, isAsc);
+        default: return 0;
+      }
+    });
+  }
+
+  patientStatusSortData(sort: Sort, entries: any[]) {
     entries.sort((a, b) =>
       this.compare(a[sort.active] || 0, b[sort.active] || 0, sort.direction === "asc")
     );
