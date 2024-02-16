@@ -53,6 +53,7 @@ export class MainComponent {
   splittedText= [];
   visualIndex: number;
   assemblyId: string = "";
+  queryCombination: string | null = null;
   ref = "";
   alt = "";
   referenceName = [];
@@ -84,6 +85,7 @@ export class MainComponent {
   vis: number = 0;
   pageOfItems: Array<any>;
   statePageOfItems: Array<any>;
+  patientStatus: Array<any> = [];
   externalLink = "";
 
 
@@ -172,6 +174,13 @@ export class MainComponent {
       }
     });
   }
+
+  patientStatusSortData(sort: Sort, entries: any[]) {
+    entries.sort((a, b) =>
+      this.compare(a[sort.active] || 0, b[sort.active] || 0, sort.direction === "asc")
+    );
+  }
+
   onChangePage(pageOfItems: Array<any>) {
 
         // update current page of items
@@ -281,6 +290,39 @@ export class MainComponent {
     }
   }
 
+  parseMutationExpression(expression: string): [string, any[]] {
+    const _expression = expression.replace(/\s/g,"");
+    const varRegex =
+      /^((?<refName>[0-9a-zA-Z]+)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/i;
+    const logicRegex = /[!&:()|]/;
+    const queries: any[] = [];
+    let combination: string = "";
+    let index: number = 0;
+
+    for (let pos = 0; pos < _expression.length; pos++) {
+      const char = _expression[pos];
+
+      if (char.match(logicRegex)) {
+        // consume the groupings (parenthesis) and logic (!|)
+        combination += char == ":" ? "&" : char;
+      } else {
+        // consume the mutation
+        const remainder = _expression.slice(pos);
+        const matches: any = remainder.match(varRegex);
+        // must have a match starting here else skip
+        if (matches) {
+          queries.push(matches.groups);
+          combination += index.toString();
+          // jump over the match and increment index
+          pos += matches[0].length - 1;
+          index += 1;
+        }
+      }
+    }
+
+    return [combination, queries];
+  }
+
   query() {
       this.assemblyId = 'hCoV-19';
       this.start = [];
@@ -295,56 +337,112 @@ export class MainComponent {
 
           if(this.varType != null ){
             this.alt = null;
-            this.queryData = {"assemblyId": "hCoV-19","includeDatasetResponses":"ALL", "referenceName": "1", "referenceBases": this.ref.toUpperCase(), "startMin":(this.sMin-1).toString(), "startMax": (this.sMax-1).toString(), "endMin": (this.eMin-1).toString(), "endMax": (this.eMax-1).toString(), "variantType": this.varType.toUpperCase(), "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate"]};
+            this.queryData = {"assemblyId": "hCoV-19","includeDatasetResponses":"ALL", "referenceName": "1", "referenceBases": this.ref.toUpperCase(), "startMin":(this.sMin-1).toString(), "startMax": (this.sMax-1).toString(), "endMin": (this.eMin-1).toString(), "endMax": (this.eMax-1).toString(), "variantType": this.varType.toUpperCase(), "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate", "Patient.Status"]};
           }
           if(this.alt != null ){
             this.varType = null;
-            this.queryData = {"assemblyId": "hCoV-19","includeDatasetResponses":"ALL", "referenceName": "1", "referenceBases": this.ref.toUpperCase(), "alternateBases": this.alt.toUpperCase(), "startMin":(this.sMin-1).toString(), "startMax": (this.sMax-1).toString(), "endMin": (this.eMin-1).toString(), "endMax": (this.eMax-1).toString(), "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate"]};
+            this.queryData = {"assemblyId": "hCoV-19","includeDatasetResponses":"ALL", "referenceName": "1", "referenceBases": this.ref.toUpperCase(), "alternateBases": this.alt.toUpperCase(), "startMin":(this.sMin-1).toString(), "startMax": (this.sMax-1).toString(), "endMin": (this.eMin-1).toString(), "endMax": (this.eMax-1).toString(), "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate", "Patient.Status"]};
           }
       }else if( this.inputText != null){
 
         try {
-          let text = this.inputText.replace(/\&/g, ':');
-          if (text.includes('~')) {  // Using ~ as a delimiter for assemblyId
-            [this.assemblyId, text] = text.split('~');
+          let text = this.inputText.replace(/\&/g, ":");
+          if (text.includes("~")) {
+            // Using ~ as a delimiter for assemblyId
+            [this.assemblyId, text] = text.split("~");
           }
-          this.splittedText = text.split(':');
-          console.log(this.splittedText);
-          if(this.splittedText.length == 1){
-            var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
-            let query = regex.exec(text).groups;
+          const [queryCombination, queries] =
+            this.parseMutationExpression(text);
+          this.queryCombination = queryCombination;
 
-            this.refName.push((query.refName || "1").trim());
-            this.start.push((parseInt(query.start)-1).toString());
-            this.refBases.push((query.refBases.trim()).toUpperCase());
-            this.altBases.push((query.altBases.trim()).toUpperCase());
-            this.phylogenyPos.push((parseInt(query.start)).toString() + (query.altBases.trim()).toUpperCase());
-          }else{
-            for(var i = 0; i < this.splittedText.length; i++){
-              var regex = /(:?(?<refName>.*)-)?(?<refBases>[a-z]+)(?<start>\d+)(?<altBases>[a-z]+)/gi;
-              let query = regex.exec(this.splittedText[i]).groups;
-
-              this.refName.push((query.refName || "1").trim());
-              this.start.push((parseInt(query.start)-1).toString());
-              this.refBases.push((query.refBases.trim()).toUpperCase());
-              this.altBases.push((query.altBases.trim()).toUpperCase());
-              this.phylogenyPos.push((parseInt(query.start)).toString() + (query.altBases.trim()).toUpperCase());
-            }
-          }
-
-        }
+          queries.forEach((query: any) => {
+            this.refName.push(query.refName || "1");
+            this.start.push((parseInt(query.start) - 1).toString());
+            this.refBases.push(query.refBases.toUpperCase());
+            this.altBases.push(query.altBases.toUpperCase());
+            this.phylogenyPos.push(
+              `${query.start}${query.altBases.toUpperCase()}`
+            );
+          });
+        } 
         catch(err) {
           this.warning = "Incorrect search formatting - Please enter valid position.";
           this.loading = false;
           return;
         }
 
-        this.queryData = {"assemblyId": this.assemblyId,"includeDatasetResponses":"ALL", "referenceName": this.refName, "start": this.start, "referenceBases": this.refBases, "alternateBases": this.altBases,  "iupac": this.iupac_input,"sampleFields":["SampleCollectionDate","Location", "State", "Location_SampleCollectionDate", "State_SampleCollectionDate"]};
+        this.queryData = {
+          assemblyId: this.assemblyId,
+          includeDatasetResponses: "ALL",
+          referenceName: this.refName,
+          start: this.start,
+          referenceBases: this.refBases,
+          alternateBases: this.altBases,
+          iupac: this.iupac_input,
+          sampleFields: [
+            "SampleCollectionDate",
+            "Location",
+            "State",
+            "Location_SampleCollectionDate",
+            "State_SampleCollectionDate",
+            "Patient.Status",
+          ],
+        };
+
+        if (this.queryCombination) {
+          this.queryData['queryCombination'] = this.queryCombination;
+        }
       }
 
       this.url = this.rootUrl+ "/query";
       console.log(this.queryData);
       this.getData(this.url,this.queryData);
+  }
+
+  reduceMetadata() {
+    const jsonArray = this.hits.map((entry: any) => entry.info.sampleCounts['Patient.Status'] || {});
+    const result = jsonArray.reduce((accumulator, current) => {
+      Object.keys(current).forEach(key => {
+        const currentResult = current[key] || [0, 0];
+        if (accumulator[key]) {
+          accumulator[key][0] += currentResult[0];
+          accumulator[key][1] += currentResult[1];
+        } else {
+          accumulator[key] = currentResult;
+        }
+      });
+      return accumulator;
+    }, {});
+    this.patientStatus = [];
+    // Grab the totals from first principles, in case there's some weirdness in the main sample counts
+    let varSamples = Object.values(result).reduce<number>((sum, value) => sum + value[0], 0)
+    let noVarSamples = Object.values(result).reduce<number>((sum, value) => sum + value[1], 0) - varSamples
+    Object.entries(result).forEach(([key, value]: [string, number[]]) => {
+      if (value[1] > 0) {
+        let casesWithVar = value[0];
+        let casesNoVar = value[1] - casesWithVar;
+        let controlsWithVar = varSamples - casesWithVar;
+        let controlsNoVar = noVarSamples - casesNoVar;
+        if (casesWithVar == 0 || casesNoVar == 0 || controlsWithVar == 0 || controlsNoVar == 0) {
+          // perform Haldane-Anscombe correction
+          casesWithVar += 0.5;
+          casesNoVar += 0.5;
+          controlsWithVar += 0.5;
+          controlsNoVar += 0.5;
+        }
+        let logOddsRatioVal = Math.log((casesWithVar*controlsNoVar) / (casesNoVar*controlsWithVar))
+        let logOddsErrorVal = 1.96 * Math.sqrt(1/casesWithVar + 1/casesNoVar + 1/controlsWithVar + 1/controlsNoVar)
+        this.patientStatus.push({
+          attribute: key,
+          occurrences: value[0],
+          total: value[1],
+          percentage: 100.0 * value[0] / value[1],
+          logOddsRatio: logOddsRatioVal,
+          logOddsError: logOddsErrorVal,
+          significant: Math.abs(logOddsRatioVal) > logOddsErrorVal,
+        });
+      }
+    });
   }
 
   getData(url, qData){
@@ -365,6 +463,7 @@ export class MainComponent {
               this.loading = false;
               const maxDatasetId: any = response.datasetAlleleResponses.sort((a, b) => b.callCount - a.callCount)[0];
               this.visualIndex = maxDatasetId.info.name;
+              this.reduceMetadata();
               this.graphDataGenerator(this.hits, this.visualIndex);
               this.statesData("Indonesia","IDN");
               this.filteredArray = response.datasetAlleleResponses.filter(function(itm){
@@ -407,6 +506,7 @@ export class MainComponent {
           const maxDatasetId: any = response.datasetAlleleResponses.sort((a, b) => b.callCount - a.callCount)[0];
           this.visualIndex = maxDatasetId.info.name;
           console.log(this.visualIndex);
+          this.reduceMetadata();
           this.graphDataGenerator(this.hits, this.visualIndex);
           this.statesData("Indonesia","IDN");
           this.filteredArray = response.datasetAlleleResponses.filter(function(itm){
