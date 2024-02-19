@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { AppConfigService } from '../../app.config.service';
 import { Beacon, Dataset } from './search.interfaces';
-import { MatTableDataSource } from '@angular/material';
+import { MatTableDataSource } from '@angular/material/table';
 import {MatSort, Sort} from '@angular/material/sort';
 import { Router } from '@angular/router';
 
