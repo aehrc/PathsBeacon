@@ -1,34 +1,32 @@
-import { Component } from '@angular/core';
-import { OktaAuthService } from '@okta/okta-angular';
-import { AppConfigService } from './app.config.service';
-import { Router } from '@angular/router';
+import { Component, Inject } from "@angular/core";
+import { OKTA_AUTH, OktaAuthStateService } from "@okta/okta-angular";
+import { OktaAuth, AuthState } from "@okta/okta-auth-js";
+import { AppConfigService } from "./app.config.service";
+import { Router } from "@angular/router";
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"],
 })
 export class AppComponent {
-  title = 'beaconApp';
+  title = "beaconApp";
   isAuthenticated: boolean;
   login: boolean;
 
-  constructor(public oktaAuth: OktaAuthService, private appConfigService: AppConfigService, private router: Router) {
-     this.oktaAuth.$authenticationState.subscribe(
-       (isAuthenticated: boolean)  => this.isAuthenticated = isAuthenticated
-     );
-   }
+  constructor(
+    @Inject(OKTA_AUTH) private oktaAuth: OktaAuth,
+    private authStateService: OktaAuthStateService,
+    private appConfigService: AppConfigService
+  ) {}
 
-   ngOnInit() {
-     this.login = this.appConfigService.login;
-     this.oktaAuth.isAuthenticated().then((auth) => {
-       this.isAuthenticated = auth;
-       if(this.login == true && this.isAuthenticated == false ){
-         this.router.navigate(['/login']);
-       }
-     });
-    }
-    logout() {
-    this.oktaAuth.logout('/');
+  ngOnInit() {
+    this.login = this.appConfigService.login;
+    this.authStateService.authState$.subscribe((state: AuthState) => {
+      this.isAuthenticated = state.isAuthenticated;
+    });
   }
 
+  logout() {
+    this.oktaAuth.signOut({ postLogoutRedirectUri: "" });
+  }
 }

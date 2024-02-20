@@ -1,51 +1,53 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, NavigationStart} from '@angular/router';
+import { Component, Inject, OnInit } from "@angular/core";
+import { Router, NavigationStart } from "@angular/router";
 
-import { environment } from './../../../environments/environment';
-import { OktaAuthService } from '@okta/okta-angular';
-import * as OktaSignIn from '@okta/okta-signin-widget';
-import { AppConfigService } from '../../app.config.service';
+import { environment } from "./../../../environments/environment";
+import { OKTA_AUTH } from "@okta/okta-angular";
+import { OktaSignIn } from "@okta/okta-signin-widget";
+import { OktaAuth } from "@okta/okta-auth-js";
+import "@okta/okta-signin-widget/css/okta-sign-in.min.css";
 
 @Component({
-  selector: 'app-login',
-  template:`<div id="okta-signin-container"></div>`,
-  styles: []
+  selector: "app-login",
+  template: `<div id="okta-signin-container"></div>`,
+  styles: [],
 })
 export class LoginComponent implements OnInit {
-  widget = new OktaSignIn({
-    baseUrl: environment.okta.url
+  protected signIn = new OktaSignIn({
+    baseUrl: environment.okta.url,
   });
 
-  constructor(private oktaAuth: OktaAuthService, router: Router, private appConfigService: AppConfigService) {
+  constructor(@Inject(OKTA_AUTH) private oktaAuth: OktaAuth, router: Router) {
     // Show the widget when prompted, otherwise remove it from the DOM.
-      router.events.forEach(event => {
-        if (event instanceof NavigationStart) {
-          switch(event.url) {
-            case '/login':
-            case '/main':
-              break;
-            default:
-              this.widget.remove();
-              break;
-          }
+    router.events.forEach((event) => {
+      if (event instanceof NavigationStart) {
+        switch (event.url) {
+          case "/login":
+          case "/main":
+            break;
+          default:
+            this.signIn.remove();
+            break;
         }
-      });
-
+      }
+    });
   }
 
   ngOnInit() {
-    this.widget.renderEl({
-      el: '#okta-signin-container'},
-      (res) => {
-        if (res.status === 'SUCCESS') {
-          this.oktaAuth.loginRedirect('/', { sessionToken: res.session.token });
-          // Hide the widget
-          this.widget.hide();
+    this.signIn
+      .renderEl({
+        el: "#okta-signin-container",
+      })
+      .then((res) => {
+        if (res.status === "SUCCESS") {
+          console.log(res);
+          
+          this.oktaAuth.signInWithRedirect({ sessionToken: res.session.token });
+          this.signIn.hide();
         }
-      },
-      (err) => {
+      })
+      .catch((err) => {
         throw err;
-      }
-    );
+      });
   }
 }
