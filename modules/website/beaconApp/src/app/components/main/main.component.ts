@@ -15,6 +15,7 @@ import * as d3 from "d3";
 import d3Tip from "d3-tip";
 import { DownloadService } from "./main.service";
 import { Router } from "@angular/router";
+import { compare } from "./utils/compare";
 
 @Component({
   selector: "app-main",
@@ -74,7 +75,6 @@ export class MainComponent {
   refName = [];
   phylogenyPos = [];
   varType: string = null;
-  isVisible: boolean = true;
   stateVisilble: boolean = false;
   rootUrl: string = this.appConfigService.apiBaseUrl;
   login: boolean = this.appConfigService.login;
@@ -134,12 +134,10 @@ export class MainComponent {
     );
   }
 
-  compare(a: number | string, b: number | string, isAsc: boolean) {
-    return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
-  }
   similaritySearch() {
     this.router.navigate(["search", this.inputText]);
   }
+
   navigate() {
     console.log(this.start);
     console.log(this.phylogenyPos.join(","));
@@ -184,19 +182,19 @@ export class MainComponent {
           const isAsc = sort.direction === "asc";
           switch (sort.active) {
             case "contig":
-              return this.compare(a.contig, b.contig, isAsc);
+              return compare(a.contig, b.contig, isAsc);
             case "position":
-              return this.compare(a.pos, b.pos, isAsc);
+              return compare(a.pos, b.pos, isAsc);
             case "ref":
-              return this.compare(a.ref, b.ref, isAsc);
+              return compare(a.ref, b.ref, isAsc);
             case "alt":
-              return this.compare(a.alt, b.alt, isAsc);
+              return compare(a.alt, b.alt, isAsc);
             case "SIFT_score":
-              return this.compare(a.SIFT_score, b.SIFT_score, isAsc);
+              return compare(a.SIFT_score, b.SIFT_score, isAsc);
             case "sampleCount":
-              return this.compare(a.sampleCount, b.sampleCount, isAsc);
+              return compare(a.sampleCount, b.sampleCount, isAsc);
             case "frequency":
-              return this.compare(a.frequency, b.frequency, isAsc);
+              return compare(a.frequency, b.frequency, isAsc);
             default:
               return 0;
           }
@@ -204,38 +202,6 @@ export class MainComponent {
         continue;
       }
     }
-  }
-
-  stateSortData(sort: Sort) {
-    const data = this.states.slice();
-    if (!sort.active || sort.direction === "") {
-      this.states = data;
-      return;
-    }
-
-    this.states = data.sort((a, b) => {
-      const isAsc = sort.direction === "asc";
-      switch (sort.active) {
-        case "regions":
-          return this.compare(a.regions, b.regions, isAsc);
-        case "count":
-          return this.compare(a.count, b.count, isAsc);
-        case "frequency":
-          return this.compare(a.frequency, b.frequency, isAsc);
-        default:
-          return 0;
-      }
-    });
-  }
-
-  patientStatusSortData(sort: Sort, entries: any[]) {
-    entries.sort((a, b) =>
-      this.compare(
-        a[sort.active] || 0,
-        b[sort.active] || 0,
-        sort.direction === "asc"
-      )
-    );
   }
 
   onChangePage(pageOfItems: Array<any>) {
@@ -250,9 +216,7 @@ export class MainComponent {
   refreshGraph() {
     this.graphDataGenerator(this.hits, this.visualIndex);
   }
-  ShowHide() {
-    this.isVisible = !this.isVisible;
-  }
+
   refresh() {
     var location = window.location;
     if (
@@ -329,7 +293,6 @@ export class MainComponent {
   search(searches) {
     if (searches == "D614G") {
       this.sMin = this.sMax = this.eMin = this.eMax = null;
-      this.isVisible = true;
       this.inputText = "A23403G";
       this.iupac = false;
       this.iupac_input = "False";
@@ -337,7 +300,6 @@ export class MainComponent {
     }
     if (searches == "Y453F") {
       this.sMin = this.sMax = this.eMin = this.eMax = null;
-      this.isVisible = true;
       this.inputText = "A22920T";
       this.iupac = false;
       this.iupac_input = "False";
@@ -345,7 +307,6 @@ export class MainComponent {
     }
     if (searches == "spike") {
       this.inputText = null;
-      this.isVisible = false;
       this.sMin = this.eMin = 21563;
       this.sMax = this.eMax = 25384;
       this.ref = this.alt = "N";
@@ -355,7 +316,6 @@ export class MainComponent {
     }
     if (searches == "ORF6") {
       this.inputText = null;
-      this.isVisible = false;
       this.sMin = this.eMin = 27202;
       this.sMax = this.eMax = 27387;
       this.ref = this.alt = "N";
@@ -365,7 +325,6 @@ export class MainComponent {
     }
     if (searches == "UKV") {
       this.sMin = this.sMax = this.eMin = this.eMax = null;
-      this.isVisible = true;
       this.inputText =
         "A23063T&C23271A&C23604A&C23709T&T24506G&G24914C&C3267T&C5388A&T6954C&C27972T&G28048T&A28111G&G28280C&A28281T&T28282A&C28977T&ATACATG21764A&TTTA21990T&GTCTGGTTTT11287G";
       this.iupac = false;

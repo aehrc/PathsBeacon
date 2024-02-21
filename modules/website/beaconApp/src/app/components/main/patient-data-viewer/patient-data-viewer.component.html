@@ -1,0 +1,22 @@
+<mat-card-content *ngIf="data.length">
+  <table class="table table-striped table-bordered table-hover" matSort (matSortChange)="patientStatusSortData($event)">
+    <thead>
+      <tr>
+        <th mat-sort-header="attribute" title="Attribute in patients' metadata"> Patient Attribute</th>
+        <th mat-sort-header="total" title="Number of occurrences and total count"> Count / Total </th>
+        <th mat-sort-header="percentage" title="Percentage occurrences of the attribute."> Frequency </th>
+        <th mat-sort-header="logOddsRatio" title="Log Odds Ratio with 95% confidence interval"> Log Odds Ratio (95% CI)
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of data; track item">
+        <td> {{item.attribute}} </td>
+        <td> {{ item.occurrences }} / {{ item.total }} </td>
+        <td> {{ item.percentage | number:'1.3-3' }}% </td>
+        <td [style.font-weight]="item.significant ? 'bold' : null"> {{ item.logOddsRatio | number:'1.2-2' }}&plusmn;{{
+          item.logOddsError | number:'1.2-2' }} </td>
+      </tr>
+    </tbody>
+  </table>
+</mat-card-content>
