@@ -1,22 +1,27 @@
-<mat-card-content *ngIf="data.length">
-  <table class="table table-striped table-bordered table-hover" matSort (matSortChange)="stateSortData($event)">
-    <thead>
-      <tr>
-        <th mat-sort-header="regions" title="Country and Regions"> Country / Region</th>
-        <th mat-sort-header="count" title="Number of hits specific to this region."> Count </th>
-        <th mat-sort-header="frequency" title="Count/Total count of variants specific to this region."> Frequency </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of data; track item" (click)="click.emit(item.regions)">
-        <td> {{item.regions}} </td>
-        <td> {{ item.count }} </td>
-        <td> {{ item.frequency }}% </td>
-      </tr>
-    </tbody>
-  </table>
-  <div class=" pagination pb-0 pt-3">
-    <!-- TODO -->
-    <!-- <jw-pagination [items]="states"  (changePage)="onChangeStatePage($event)"></jw-pagination> -->
+<mat-card-content *ngIf="dataSource?.data.length">
+  <div class="mat-elevation-z8">
+
+    <table mat-table [dataSource]="dataSource" matSort>
+      <ng-container matColumnDef="regions">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Country and Regions"> Country / Region </th>
+        <td mat-cell *matCellDef="let row"> {{row.regions}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="count">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header matTooltip="Number of hits specific to this region"> Count
+        </th>
+        <td mat-cell *matCellDef="let row"> {{row.count}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="frequency">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header
+          matTooltip="Count/Total count of variants specific to this region"> Frequency </th>
+        <td mat-cell *matCellDef="let row"> {{row.frequency}} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr role="button" mat-row *matRowDef="let row; columns: displayedColumns;" (click)="stateClick.emit(row.regions)"></tr>
+    </table>
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
   </div>
 </mat-card-content>

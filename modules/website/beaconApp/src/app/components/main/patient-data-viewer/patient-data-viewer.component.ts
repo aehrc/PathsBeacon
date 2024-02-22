@@ -1,32 +1,42 @@
-import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
-import { Sort } from "@angular/material/sort";
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  ViewChild,
+} from "@angular/core";
+import { MatSort, Sort } from "@angular/material/sort";
 import { compare } from "../utils/compare";
+import { MatPaginator } from "@angular/material/paginator";
+import { MatTableDataSource } from "@angular/material/table";
 
 @Component({
   selector: "app-patient-data-viewer",
   templateUrl: "./patient-data-viewer.component.html",
-  styleUrl: "./patient-data-viewer.component.css",
+  styleUrl: "./patient-data-viewer.component.scss",
 })
-export class PatientDataViewerComponent implements OnChanges {
+export class PatientDataViewerComponent implements OnChanges, AfterViewInit {
   @Input({ required: true }) patientStatus: any;
-  protected data: any = null;
-
-  ngOnChanges(changes: SimpleChanges): void {
-    this.data = structuredClone(changes.patientStatus.currentValue);
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
+  protected displayedColumns: string[] = [
+    "attribute",
+    "occurrences",
+    "percentage",
+    "logOddsError",
+  ];
+  protected dataSource: MatTableDataSource<any>;
+  constructor() {
+    this.dataSource = new MatTableDataSource(this.patientStatus);
   }
 
-  patientStatusSortData(sort: Sort) {
-    if (!sort.direction) {
-      this.data = structuredClone(this.patientStatus);
-      return;
-    }
+  ngOnChanges(changes: SimpleChanges): void {
+    this.dataSource.data = structuredClone(changes.patientStatus.currentValue);
+  }
 
-    this.data.sort((a, b) =>
-      compare(
-        a[sort.active] || 0,
-        b[sort.active] || 0,
-        sort.direction === "asc"
-      )
-    );
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 }

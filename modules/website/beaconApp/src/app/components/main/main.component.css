@@ -6,7 +6,7 @@
 #formatted {
   white-space: pre-line;
 }
-
+/* 
 .example-card {
   max-width: auto;
   height: auto;
@@ -14,15 +14,15 @@
   display: flex;
   flex-direction: column;
   margin: 8px;
-}
+} */
 
 .mat-form-field {
   width: 150px !important;
   padding: 2px 5px 1px !important;
 }
-.full-width-field {
+/* .full-width-field {
   width: 60% !important;
-}
+} */
 
 .button {
   margin: 8px 8px;
@@ -35,17 +35,7 @@
   max-height: 800px;
   min-width: 300px;
 }
-#popular {
-  font-weight: 700;
-}
-#popular a {
-  font-weight: 700;
-  color: #0f4b7d;
-  text-decoration: none;
-}
-#iupac_input {
-  margin-left: 8px;
-}
+
 #phylogeny {
   margin-left: 10px;
 }

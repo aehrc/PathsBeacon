@@ -32,9 +32,12 @@ import { MatInputModule } from "@angular/material/input";
 import { MatOptionModule } from "@angular/material/core";
 import { OktaAuth } from "@okta/okta-auth-js";
 import { Router } from "@angular/router";
-import { PatientDataViewerComponent } from './components/main/patient-data-viewer/patient-data-viewer.component';
-import { StateDataViewerComponent } from './components/main/state-data-viewer/state-data-viewer.component';
+import { PatientDataViewerComponent } from "./components/main/patient-data-viewer/patient-data-viewer.component";
+import { StateDataViewerComponent } from "./components/main/state-data-viewer/state-data-viewer.component";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatPaginatorModule } from "@angular/material/paginator";
+import { ResultsViewerComponent } from './components/search/results-viewer/results-viewer.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -60,11 +63,14 @@ const onAuthRequired = (oktaAuth, injector, options) => {
     StrepifunComponent,
     PatientDataViewerComponent,
     StateDataViewerComponent,
+    ResultsViewerComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
+    MatCheckboxModule,
     BrowserAnimationsModule,
+    MatPaginatorModule,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
