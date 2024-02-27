@@ -18,7 +18,7 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { MatIconModule } from "@angular/material/icon";
 import { DownloadService } from "./components/main/main.service";
 import { SearchComponent } from "./components/search/search.component";
-import { environment } from "./../environments/environment";
+import { environment } from "../environments/environment";
 import { StrepifunComponent } from "./components/strepifun/strepifun.component";
 import * as PlotlyJS from "plotly.js-dist-min";
 import { PlotlyModule } from "angular-plotly.js";
@@ -42,8 +42,8 @@ import { ResultsViewerComponent } from './components/search/results-viewer/resul
 PlotlyModule.plotlyjs = PlotlyJS;
 
 const authConfig = {
-  issuer: `${environment.okta.url}/oauth2/default`,
   redirectUri: `/implicit/callback`,
+  issuer: `${environment.okta.url}/oauth2/default`,
   clientId: environment.okta.clientId,
 };
 const oktaAuth = new OktaAuth(authConfig);

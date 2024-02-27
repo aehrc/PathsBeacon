@@ -37,7 +37,20 @@
               "src/styles.scss"
             ],
             "scripts": [],
-            "browser": "src/main.ts"
+            "browser": "src/main.ts",
+            "allowedCommonJsDependencies": [
+              "plotly.js-dist-min",
+              "tiny-emitter",
+              "cross-fetch",
+              "p-cancelable",
+              "q",
+              "jquery",
+              "clipboard",
+              "@sindresorhus/to-milliseconds",
+              "parse-ms",
+              "detect-node",
+              "u2f-api-polyfill"
+            ]
           },
           "configurations": {
             "production": {

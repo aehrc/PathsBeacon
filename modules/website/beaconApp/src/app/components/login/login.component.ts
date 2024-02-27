@@ -1,11 +1,10 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { Router, NavigationStart } from "@angular/router";
 
-import { environment } from "./../../../environments/environment";
+import { environment } from "../../../environments/environment";
 import { OKTA_AUTH } from "@okta/okta-angular";
 import { OktaSignIn } from "@okta/okta-signin-widget";
 import { OktaAuth } from "@okta/okta-auth-js";
-import "@okta/okta-signin-widget/css/okta-sign-in.min.css";
 
 @Component({
   selector: "app-login",
