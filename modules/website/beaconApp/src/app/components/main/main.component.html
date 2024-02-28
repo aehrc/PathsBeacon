@@ -200,7 +200,7 @@
 									<th mat-header-cell title="Download gisaid metadata" *matHeaderCellDef> Metadata Download </th>
 									<td mat-cell *matCellDef="let element">
 										<span *ngIf="element.datasetId === 'gisaid'"> <a href="javascript: void(0);"
-												(click)="download()"><mat-icon>vertical_align_bottom</mat-icon></a> </span>
+												(click)="download()"><mat-icon color="primary">download</mat-icon></a> </span>
 									</td>
 								</ng-container>
 
@@ -283,26 +283,31 @@
 								<span> No Regions data available for the searched variants</span>
 							</mat-card-content>
 						</mat-card>
-						<br>
-						<div class="container p-0">
-							<button mat-raised-button color="primary" class="button" (click)="this.visual()" *ngIf="!vis">
-								Generate Visual
-							</button>
-							<mat-form-field>
-								<mat-select matTooltip="Change Dataset to update visualisation" id="dropDown2" name="type"
-									[(ngModel)]="visualIndex" (selectionChange)="graphDataGenerator(hits,visualIndex);">
-									<mat-option *ngFor="let hit of hits" [value]="hit.info.name">
-										{{hit.info.name}}
-									</mat-option>
-								</mat-select>
-							</mat-form-field>
-						</div>
-						<button mat-raised-button color="primary" class="button" (click)="this.refreshGraph()"
-							*ngIf="vis">Reset</button>
-
 					</section>
-					<div id="choropleth"></div>
-					<div id="histogram"></div>
+					<br>
+					<mat-card>
+						<mat-card-content>
+							<div class="d-flex flex-wrap justify-content-start">
+								<button mat-raised-button color="primary" class="button align-middle" (click)="this.visual()" *ngIf="!vis">
+									Generate Visual
+								</button>
+								<button mat-raised-button color="primary" class="button align-middle" (click)="this.refreshGraph()"
+									*ngIf="vis">Reset</button>
+								<mat-form-field class="align-middle">
+									<mat-select matTooltip="Change Dataset to update visualisation" id="dropDown2" name="type" [(ngModel)]="visualIndex"
+										(selectionChange)="graphDataGenerator(hits,visualIndex);">
+										<mat-option *ngFor="let hit of hits" [value]="hit.info.name">
+											{{hit.info.name}}
+										</mat-option>
+									</mat-select>
+								</mat-form-field>
+							</div>
+							<div class="d-flex flex-wrap  justify-content-start column-gap-3 row-gap-3">
+								<div id="choropleth" class="mat-elevation-z8"></div>
+								<div id="histogram" class="mat-elevation-z8"></div>
+							</div>
+						</mat-card-content>
+					</mat-card>
 				</div>
 			</mat-card-content>
 
