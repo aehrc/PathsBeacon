@@ -18,14 +18,14 @@
     white-space: pre-line;
   }
 
-  .example-card {
+  /* .example-card {
     max-width: auto;
     height: auto;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     margin: 8px;
-  }
+  } */
 
   .mat-form-field{
         width:150px !important;

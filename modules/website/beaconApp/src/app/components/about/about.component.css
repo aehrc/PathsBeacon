@@ -5,11 +5,21 @@
 	color: #8E8E8E;
 	font: 16px Arial;
 }
-
+/* 
 .example-card {
   max-width: auto;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   margin: 8px;
-}
+} */
+/* 
+#sBeacon_logo{
+	object-fit: contain;
+	width: 250px;
+	height: 150px;
+	background: #ffffff;
+	display: block;
+  margin-left: auto;
+  margin-right: auto;
+} */
